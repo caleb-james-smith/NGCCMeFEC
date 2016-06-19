@@ -58,11 +58,11 @@ class RM:
         if self.location in [3,4]:
             # Open channel to ngCCM for RM 3,4: J1 - J10
             b.write(0x72,[0x02])
-        elif rm in [2,3]:
+        elif self.location in [1,2]:
             # Open channel to ngCCM for RM 1,2: J17 - J26
             b.write(0x72,[0x01])
         else:
-            print 'Invalid RM = ', rm
+            print 'Invalid RM = ', self.location
             print 'Please choose RM = {1,2,3,4}'
             return 'closed channel'
         # Open channel to i2c group
