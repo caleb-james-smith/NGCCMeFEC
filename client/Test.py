@@ -1,3 +1,4 @@
+# Test.py
 class Test:
     def __init__(self, bus, address, logfile, iterations = 1):
         self.bus = bus
@@ -16,5 +17,3 @@ class Test:
 
     def testBody(self):
         return True
-
-
