@@ -32,6 +32,7 @@ class RM:
     def __init__(self, location, activeSlots):
         '''Initializes an RM object at a specific location on the test stand'''
         self.qCards = []
+        self.location = location
         for i in activeSlots:
             self.qCards.append(qCard(i))
     def __repr__(self):
@@ -45,7 +46,6 @@ class RM:
         return s
 
     # Open Channel to RM
-    self.location = location
     def openChannel(self):
         if self.location in [3,4]:
             # Open channel to ngCCM for RM 3,4: J1 - J10
