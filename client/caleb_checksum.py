@@ -63,4 +63,4 @@ def testCRC(numTests):
         print intDataList[test], ' : ', checkCRC(intDataList[test], 2, 10),'\n'
 
 # numTests = 3... happy, sad, and I2C Error
-# testCRC(3)
+testCRC(3)

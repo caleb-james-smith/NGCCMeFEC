@@ -37,4 +37,3 @@ class qCard:
 		self.passed.append(result)
 	print self.passed
 	#print self.passed
-		

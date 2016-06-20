@@ -43,15 +43,7 @@ class RM:
         for card in self.qCards:
             s += "qCard at %s \n" % card.slot
         return s
-    def runAll(self,barCodeList):
-        for q in range(len(self.qCards)):
-            self.qCards[q].runAll(barCodeList[q])
-    def runSingle(self, key):
-	for q in self.qCards:
-	    q.runSingle(key)
-    def printAll(self):
-        for q in self.qCards:
-            print q
+
     # Open Channel to RM
     self.location = location
     def openChannel(self):
@@ -68,3 +60,17 @@ class RM:
         # Open channel to i2c group
         b.write(0x74, ngccmGroup(self.location))
         return b.sendBatch()
+
+    def runAll(self,barCodeList):
+        self.openChannel()
+        for q in range(len(self.qCards)):
+            self.qCards[q].runAll(barCodeList[q])
+
+    def runSingle(self, key):
+        self.openChannel()
+        for q in self.qCards:
+            q.runSingle(key)
+
+    def printAll(self):
+        for q in self.qCards:
+            print q
