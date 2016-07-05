@@ -1,2 +1,7 @@
-# No pyc for you or me!
+
+**.pyc
+**.log
+**.json
+**.swp
+**.py~
 *.pyc
