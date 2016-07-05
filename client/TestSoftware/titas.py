@@ -9,6 +9,7 @@ sys.path.append("../")
 from client import webBus
 import Hardware as h
 import iglooClass_adry as i
+from uniqueID import ID
 # from uHTR import uHTR
 
 
@@ -18,6 +19,8 @@ b     = webBus(pi,0) # webBus sets active pi; 0 = server verbosity off
 slots = [2,5] # list of active J slots
 
 
+##### Unique ID #####
+ID()
 
 ##### Functions ######
 
