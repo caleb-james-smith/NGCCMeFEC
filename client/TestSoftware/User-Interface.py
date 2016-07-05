@@ -4,35 +4,57 @@
 # with the setup in the lab.
 # Developed with the help of many people
 # For Baylor University, Summer 2016.
-
+#
 # This is a comment to see if I got git to work properly
 # round 2 electric boogaloo
 
+import qCard
+import loggerClass as logClass
+import testSummary
 from Tkinter import *
 from client import webBus
-from qieCommands import qieCommands
+from TestStand import TestStand
 from datetime import datetime
+import subprocess
+import htrProcesses.histo_generator as histgen
 
 class makeGui:
 	def __init__(self, parent):
 
 		# Create a list of QIECard slots:
-		self.cardSlots = ["Card 1", "Card 2", "Card 3", "Card 4", "Card 5",
-			     "Card 6","Card 7", "Card 8", "Card 9", "Card 10",
-			     "Card 11", "Card 12", "Card 13", "Card 14",
-			     "Card 15", "Card 16"]
+		self.cardSlots = ["Card 2", "Card 3", "Card 4", "Card 5", "Card 7",
+			     "Card 8","Card 9", "Card 10", "Card 18", "Card 19",
+			     "Card 20", "Card 21", "Card 23", "Card 24",
+			     "Card 25", "Card 26"]
+
+		# Create a dict for converting GUI list of suites to stuff for
+		# behind-the-scenes
+		self.suiteDict = {
+				  "Main Suite : All Tests" : "main",
+				  "Bridge Register Suite"  : "bridge",
+				  "Igloo Register Suite"   : "igloo",
+				  "Vttx Register Suites"   : "vttx",
+				  "Run Long Tests"         : "long",
+				  "Run Short Tests"        : "short"
+				 }
 
 		# Create a list of nGCCme slots:
 		self.ngccmeSlots = ["nGCCme 1", "nGCCme 2"]
 
 		# Create a list of Readout Modules:
 		self.readoutSlots = ["RM 1", "RM 2", "RM 3", "RM 4"]
-	
-		# Instantiate a qieCommands class member
-		self.myCommands = qieCommands()
 
-		# Instantiate a webBus member:
-		self.gb = webBus("pi5")		
+		# Create a string that uniquely defines a human log file
+		self.humanLogName = "{:%b%d%Y_%H%M%S}".format(datetime.now())+"_tests.log"
+
+		# Make an empty list that will eventually contain all of
+		# the active card slots
+		self.outSlotNumbers = []
+
+		# make an empty list that will eventually contain all of
+		# the TestSummary instances that get sent out
+		self.outSummaries = []
+
 
 		# Name the parent. This is mostly for bookkeeping purposes
 		# and doesn't really get used too much.
@@ -45,6 +67,9 @@ class makeGui:
 		self.nameChoiceVar  =  StringVar()
 		self.infoCommentVar =  StringVar()
 		self.runtimeNumber  =  StringVar()
+		self.suiteChoiceVar =  StringVar()
+		self.piChoiceVar    =  StringVar()
+		self.iterationVar   =  StringVar()
 		self.allCardSelection = IntVar()
 	
 		# Place an all-encompassing frame in the parent window. All of the following
@@ -55,7 +80,7 @@ class makeGui:
 		# Add a flag to stop tests
 		self.quitTestsFlag = False
 		
-		#----- constants for controlling layout
+		# Constants for controlling layout
 		button_width = 6
 		
 		button_padx = "2m"
@@ -65,7 +90,7 @@ class makeGui:
 		frame_pady = "2m"
 		frame_ipadx = "3m"
 		frame_ipady = "1m"
-		#---------- end layout constants ------
+		# End layout constants
 
 	
 		##########################################
@@ -112,7 +137,7 @@ class makeGui:
 
 		# Make a bottom half-frame
 		self.botHalf_frame = Frame(self.topMost_frame)
-		self.botHalf_frame.pack(side=RIGHT)
+		self.botHalf_frame.pack(side=LEFT)
 
 		# Make and pack a sub-frame within topMost_frame that will contain
 		# all of the controls for talking with the QIE cards
@@ -130,18 +155,19 @@ class makeGui:
 			pady=frame_pady
 			)
 
-		# Make a runtime frame. For now this will contain
+		# Make a uHTR frame. For now this will contain
 		# information regarding the tests being conducted.
-		self.runtime_frame = Frame(
+		self.uHTR_frame = Frame(
 			self.botHalf_frame,
 			borderwidth=5, relief=RIDGE,
 			height=250, width=400,
 			background="white"
 			)
 		# We don't want this frame to shrink when placing widgets:
-		self.runtime_frame.pack_propagate(False)		
 
-		self.runtime_frame.pack(
+		#self.uHTR_frame.pack_propagate(False)		
+
+		self.uHTR_frame.pack(
 			side=TOP,
 			ipadx=frame_ipadx,
 			ipady=frame_ipady,
@@ -201,10 +227,10 @@ class makeGui:
 
 		# Make and pack a listbox to pick which QIE card to talk to:
 		self.info_nameBox = OptionMenu(self.info_subTop_frame, self.nameChoiceVar,
-					      "shogan","csmith","asmith","jpotarf",
-					      "jlawrence","abaas")
+					      "Shaun Hogan","Caleb Smith","Adryanna Smith","Jordan Potarf",
+					      "John Lawrence","Andrew Baas","Mason Dorseth","Josh Hiltbrand")
 		self.info_nameBox.pack(side=LEFT)
-		self.nameChoiceVar.set("shogan") # initializes the OptionMenu
+		self.nameChoiceVar.set("Shaun Hogan") # initializes the OptionMenu
 
 		# Make a label for the name drop-down:
 		self.info_commentLabel = Label(self.info_subBot_frame, text="User Testing Comments: ")
@@ -250,23 +276,12 @@ class makeGui:
 		# Make right subframe
 		self.experi_subRight_frame = Frame(self.experiment_frame,background="white")
 		self.experi_subRight_frame.pack(
-			side=LEFT,
-                        ipadx=frame_ipadx,
+			side=RIGHT,
                         ipady=frame_ipady,
-                        padx=frame_padx,
+			ipadx=frame_ipadx,
+			padx=frame_padx,
                         pady=frame_pady
 			)
-
-		# Make far right subframe
-		self.experi_farRight_frame = Frame(self.experiment_frame,background="white")
-		self.experi_farRight_frame.pack(
-			side=LEFT,
-                        ipadx=frame_ipadx,
-                        ipady=frame_ipady,
-                        padx=frame_padx,
-                        pady=frame_pady
-			)
-
 
 		# Label for higher-level hardware
 		self.experi_highlevel_lbl = Label(self.experi_subLeft_frame,text="High-Level\n")
@@ -363,31 +378,6 @@ class makeGui:
 				)
 			self.cardRadio.pack(side=TOP)
 
-		# Now, we add stuff to the farRight frame
-		
-		# Far-right label
-		# Label for card barcode column
-		self.experi_barcode_lbl = Label(self.experi_farRight_frame,text="Barcodes\n")
-		self.experi_barcode_lbl.configure(
-			padx=button_padx,
-			pady=button_pady,
-			background="white"
-			)
-		self.experi_barcode_lbl.pack(side=TOP)
-
-		# Create many barcode variables
-		self.barcodeVarList = [StringVar() for i in range(0,17)]
-
-		# Then, for each variable in barcodeVarList, add a Entry corresponding to it
-		for i in range(1,17):
-			self.barcodeEntry = Entry(
-				self.experi_farRight_frame,
-				textvariable=self.barcodeVarList[i],
-				borderwidth=4,
-				width=9
-				)
-			self.barcodeEntry.pack(side=TOP)
-
 		######################################
 		#####				 #####
 		#####  Widgets in the QIE frame  #####
@@ -395,7 +385,7 @@ class makeGui:
 		######################################
 
 		#Make a text label for the frame
-		self.qieFrameLabel = Label(self.qie_frame, text="QIE Cards   -   Hex Codes: 0x19 to 0x1c")
+		self.qieFrameLabel = Label(self.qie_frame, text="Main Test & Suite Controls")
 		self.qieFrameLabel.configure(
 			padx=button_padx,
 			pady=button_pady,
@@ -416,6 +406,30 @@ class makeGui:
                         pady=frame_pady
                         )
 
+		# Top sub-frame 1 in QIE frame
+		self.qie_subTop_1_frame = Frame(
+			self.qie_frame,
+			background="white"
+			)
+		self.qie_subTop_1_frame.pack(
+			side=TOP,
+                        ipadx=frame_ipadx,
+                        ipady=frame_ipady,
+                        padx=frame_padx,
+                        pady=frame_pady
+                        )
+
+		# 2nd top sub-frame in QIE frame
+		self.qie_subTop2_frame = Frame(
+			self.qie_frame,
+			background="white"
+			)
+		self.qie_subTop2_frame.pack(
+			side=TOP,
+                        ipadx=frame_ipadx,
+                        padx=frame_padx,
+                        )
+
 		# Make a sub-frame below the top sub-frame in QIE frame
                 self.qie_subTopMid_frame = Frame(
                         self.qie_frame,
@@ -424,9 +438,18 @@ class makeGui:
                 self.qie_subTopMid_frame.pack(
                         side=TOP,
                         ipadx=frame_ipadx,
-                        ipady=frame_ipady,
                         padx=frame_padx,
-                        pady=frame_pady
+                        )
+
+		# Make a 2nd sub-frame below the top sub-frame in QIE frame
+                self.qie_subTopMid2_frame = Frame(
+                        self.qie_frame,
+                        background="white"
+                        )
+                self.qie_subTopMid2_frame.pack(
+                        side=TOP,
+                        ipadx=frame_ipadx,
+                        padx=frame_padx,
                         )
 
 		# Mid sub-frame in QIE frame
@@ -455,137 +478,180 @@ class makeGui:
                         pady=frame_pady
                         )
 
-		# Make and pack a text label for the following option menu
-                self.qieChoiceLabel = Label(self.qie_subTop_frame, text="Choose QIE card to communicate with: ")
-                self.qieChoiceLabel.configure(
-                        padx=button_padx,
-                        pady=button_pady,
-                        background="white"
-                        )
-		self.qieChoiceLabel.pack(side=LEFT)
-
-		# Make and pack a listbox to pick which QIE card to talk to:
-		self.qie_listBox = OptionMenu(self.qie_subTop_frame, self.qieChoiceVar,
-					      '0x19','0x1a','0x1b','0x1c')
-		self.qie_listBox.pack(side=LEFT)
-		self.qieChoiceVar.set('0x19') # initializes the OptionMenu
-
-		# Make and pack a label for the following qie_outputText box
-		self.qie_outputTextLabel = Label(self.qie_subTopMid_frame, text="QIE Returned: ")
-		self.qie_outputTextLabel.configure(
+		# Make a label for rasp. pi selection
+		self.piSelectionLbl = Label(self.qie_subTop_frame, text="Choose the Pi to run on: ")
+		self.piSelectionLbl.configure(
 			padx=button_padx,
 			pady=button_pady,
 			background="white"
 			)
-		self.qie_outputTextLabel.pack(side=LEFT)
+		self.piSelectionLbl.pack(side=LEFT)
 
-		# Make and pack a textbox to display the output from talking with QIE cards
-		self.qie_outputText = Entry(self.qie_subTopMid_frame, textvariable=self.qieOutText,state="readonly",readonlybackground="gray90")
-		self.qie_outputText.pack(side=LEFT)
+		# Make a menu for the raspberry pi options
+		self.pi_choiceBox = OptionMenu(self.qie_subTop_frame, self.piChoiceVar,
+						"pi5", "pi6")
+		self.pi_choiceBox.pack(side=LEFT)
+		self.piChoiceVar.set("pi5")
 
-		# Make and pack a text label for the read test to run
-                self.qieReadLabel = Label(self.qie_subMid_frame, text="Select a test to run: ")
-                self.qieReadLabel.configure(
-                        padx=button_padx,
-                        pady=button_pady,
-                        background="white"
-                        )
-                self.qieReadLabel.pack(side=LEFT)
+		# Make a label for number of iterations
+		self.iter_label = Label(self.qie_subTop_1_frame, text="Number of iterations: ")
+		self.iter_label.configure(bg="white")
+		self.iter_label.pack(side=LEFT)
 
-		# Make and pack a PLACEHOLDER LISTBOX for the variable to read:
-                self.qie_readBox = OptionMenu(self.qie_subMid_frame, self.qieReadVar,
-                                              "Unique ID","Herm Test","Brdg Test",
-				              "255 Test","Zero Test","FW Version", "Humidity",
-					      "Temperature","Get Status")
-                self.qie_readBox.pack(side=LEFT)
-                self.qieReadVar.set("Unique ID") # initializes the OptionMenu
+		# Make a field for number of iterations
+		self.iter_entry = Entry(self.qie_subTop_1_frame, textvariable=self.iterationVar)
+		self.iter_entry.pack(side=RIGHT)
+		self.iterationVar.set("15")
 
-		#Make a button to read what is at the address
-		self.qie_read_Button = Button(self.qie_subMid_frame, command=self.qieClickRead)
-		self.qie_read_Button.configure(text="RUN TEST",background="khaki")
-		self.qie_read_Button.configure(
-			width=button_width*2,
+		# Make a separation line
+		self.separationLabelTop = Label(self.qie_subTop2_frame, text="------------------------------------------")
+		self.separationLabelTop.configure(bg="white")
+		self.separationLabelTop.pack()
+
+		# Make a button to reset the backplane
+		self.qie_resetButton = Button(self.qie_subTopMid_frame, command=self.qie_resetPress)
+		self.qie_resetButton.configure(text="Reset Backplane", bg="red")
+		self.qie_resetButton.configure(
+			width=button_width*4,
 			padx=button_padx,
 			pady=button_pady
 			)
-		self.qie_read_Button.pack(side=RIGHT)
+		self.qie_resetButton.pack(side=TOP)
+
+		# Make a button to reset the backplane
+		self.qie_resetButton = Button(self.qie_subTopMid_frame, command=self.powerResetPress)
+		self.qie_resetButton.configure(text="Reset/Cycle Power", bg="#E60066")
+		self.qie_resetButton.configure(
+			width=button_width*4,
+			padx=button_padx,
+			pady=button_pady
+			)
+		self.qie_resetButton.pack(side=TOP)
+
+		# Make a button to reset the backplane
+		self.qie_magicButton = Button(self.qie_subTopMid_frame, command=self.magicResetPress)
+		self.qie_magicButton.configure(text="    Magic Reset    ", bg="DarkOrchid1")
+		self.qie_magicButton.configure(
+			width=button_width*4,
+			padx=button_padx,
+			pady=button_pady
+			)
+		self.qie_magicButton.pack(side=TOP)
+
+		# Make a separation line
+		self.separationLabel = Label(self.qie_subTopMid2_frame, text="------------------------------------------")
+		self.separationLabel.configure(bg="white")
+		self.separationLabel.pack()
+
+		# Make and pack a label for suite selection:
+		self.qie_suiteLabel = Label(self.qie_subMid_frame, text="Select a suite to run: ")
+		self.qie_suiteLabel.configure(
+			padx=button_padx,
+			pady=button_pady,
+			background="white"
+			)
+		self.qie_suiteLabel.pack(side=LEFT)
+
+		# Make and pack a menu for the suite selection
+		self.qie_suiteMenu = OptionMenu(self.qie_subMid_frame, self.suiteChoiceVar,
+						"Main Suite : All Tests",
+						"Bridge Register Suite",
+						"Igloo Register Suite",
+						"Vttx Register Suites",
+						"Run Long Tests",
+						"Run Short Tests"
+						)
+		self.qie_suiteMenu.pack(side=LEFT)
+		self.suiteChoiceVar.set("Main Suite : All Tests")
+
 
 		#Make a button to run the main test suite
 		self.qie_testSuite_button = Button(self.qie_subBot_frame, command = self.runTestSuite)
-		self.qie_testSuite_button.configure(text="RUN MAIN TEST SUITE", background="turquoise")
+		self.qie_testSuite_button.configure(text="Run Selected Test Suite", background="turquoise")
 		self.qie_testSuite_button.configure(
 			width=button_width*4,
 			padx=button_padx,
 			pady=button_pady
 			)
-		self.qie_testSuite_button.pack(side=LEFT)
+		self.qie_testSuite_button.pack(side=TOP)
+
+		#Make a button to submit the results from tests.
+		self.qie_testSuite_button = Button(self.qie_subBot_frame, command = self.submitToDatabase)
+		self.qie_testSuite_button.configure(text="Upload Results to Database", background="pale green")
+		self.qie_testSuite_button.configure(
+			width=button_width*4,
+			padx=button_padx,
+			pady=button_pady
+			)
+		self.qie_testSuite_button.pack(side=TOP)
+
 
 		#################################
 		###			      ###
-		### WIDGETS IN RUNTIME FRAME  ###
+		###   WIDGETS IN uHTR FRAME   ###
 		###			      ###
 		#################################
-		
-		# Make and pack a text label for name selector
-		self.runtime_Label = Label(self.runtime_frame, text="Testing Status & Runtime Information")
-		self.runtime_Label.configure(
+		# Make and pack a text label for the box label
+		self.uHTR_frame_Label = Label(self.uHTR_frame, text="uHTR Runtime Parameters")
+		self.uHTR_frame_Label.configure(
 			padx=button_padx,
 			pady=button_pady,
 			background="white"
 			)
-		self.runtime_Label.pack(side=TOP)
+		self.uHTR_frame_Label.pack(side=TOP)
 
-		# Top sub-frame in runtime frame
-		self.runtime_subTop_frame = Frame(
-			self.runtime_frame,
-			background="white"
-			)
-		self.runtime_subTop_frame.pack(
-			side=TOP,
-                        ipadx=frame_ipadx,
-                        ipady=frame_ipady,
-                        padx=frame_padx,
-                        pady=frame_pady
-                        )
+		# Make many text variables
+		self.uHTR_slotNumber = [IntVar() for i in range(0,7)]
 
-		# Make a label for number of tests run
-		self.testsRun_Label = Label(self.runtime_subTop_frame, text="Number of tests run: ")
-		self.testsRun_Label.configure(
-			padx=button_padx,
-			pady=button_pady,
-			background="white"
-			)
-		self.testsRun_Label.pack(side=LEFT)
+		# Make a subframe for the slot number label
+		self.uHTR_sub2 = Frame(self.uHTR_frame, bg="white")
+		self.uHTR_sub2.pack(side=TOP, ipadx=frame_ipadx, ipady="1m",
+			padx=frame_padx, pady="1m")
 
-		# Make a box to actually display the number of labels run
-		self.runtime_outputText = Entry(
-			self.runtime_subTop_frame,
-			textvariable=self.runtimeNumber)
-		self.runtime_outputText.pack(side=LEFT)
-		self.runtimeNumber.set(1)
+		# Slot number parameter label
+		self.uHTR_slotNo_Lbl = Label(self.uHTR_sub2, text="Slot Number: ",bg="white")
+		self.uHTR_slotNo_Lbl.pack(side=LEFT,padx=button_padx,pady=button_pady)
 
-		#Make a button that removes all barcodes
-		self.clearBarcodeBttn = Button(
-			self.runtime_frame,
-			text="Clear Entered Barcodes",
-			background="salmon1",
-			command=self.clearBarcodePress
-			)
-		self.clearBarcodeBttn.configure(
-			padx=button_padx*2,
-			pady=button_pady*2
-			)
-		self.clearBarcodeBttn.pack(side=TOP)
+		# Make a subframe for the slot number vars
+		self.uHTR_sub3 = Frame(self.uHTR_frame, bg="white")
+		self.uHTR_sub3.pack(side=TOP, ipadx=frame_ipadx, ipady="1m",
+			padx=frame_padx, pady="1m")
 
-		#Make a widget that closes the GUI
-		self.closeButton = Button(self.runtime_frame, text="Close Window", background="orange red",
-					  command=self.closeButtonPress)
-		self.closeButton.configure(
+		# Make checkboxes for each uHTR slot
+		for i in range(0,6):
+				self.uHTR_radio = Checkbutton(
+					self.uHTR_sub3,
+					text = str(i+1), anchor=S,
+					variable = self.uHTR_slotNumber[i+1],
+					background = "lavender"
+					)
+				self.uHTR_radio.configure(
+					padx=button_padx,
+					pady=button_pady,
+					)
+				self.uHTR_radio.pack(side=LEFT)
+
+		# Make top subframe 4
+		self.uHTR_sub4 = Frame(self.uHTR_frame, bg="white")
+		self.uHTR_sub4.pack(side=TOP, ipadx=frame_ipadx, ipady="1m",
+			padx=frame_padx, pady="1m")
+
+		# Button for doing uHTR tests
+		self.uHTR_tester_bttn = Button(self.uHTR_sub4, text="Run uHTR Tests", bg="turquoise",
+						command=self.uHTR_tester_bttnPress)
+		self.uHTR_tester_bttn.configure(
 			padx=button_padx*2,
 			pady=button_pady*2,
 			)
-		self.closeButton.pack(side=TOP)
-	
+		self.uHTR_tester_bttn.pack(side=TOP)	
+
+		# now, prepare the summaries:
+		self.prepareOutCards()
+
+###############################################################################################################
+###############################################################################################################
+###############################################################################################################
+
 	#################################
 	###			      ###
 	###  BEGIN MEMBER FUNCTIONS   ###
@@ -612,63 +678,100 @@ class makeGui:
 		for i in range(9,13): self.cardVarList[i].set(self.readoutVarList[2].get())
 		for i in range(13,17): self.cardVarList[i].set(self.readoutVarList[3].get())
 
-	def clearBarcodePress(self):
-		for i in range(1,17):
-			print self.cardVarList[i].get()
-			print self.barcodeVarList[i].get()
-			self.barcodeVarList[i].set("")
-
-
-	def checksToHex(self,inCheck0,inCheck1,inCheck2,inCheck3,inCheck4,inCheck5,inCheck6,inCheck7):
-		hexVar = (inCheck0*1)+(inCheck1*2)+(inCheck2*4)+(inCheck3*8)+(inCheck4*16)+\
-			 (inCheck5*32)+(inCheck6*64)+(inCheck7*128)
-		return hexVar
-	
-	def closeButtonPress(self):
-		# IF ANYTHING SHOULD BE DONE ON CANCELLATION
-		# PUT IT IN THIS FUNCTION
-		self.myParent.destroy()
-
 	def qieClickRead(self):     # Where the magic(?) happens
 		# See what test the user has selected, and then run that test from the
 		# qieCommands.py file. Display the results in the text field within the
 		# QIE frame on the main GUI window.
-		tempInt = int(self.qieChoiceVar.get(),16)
-		if self.qieReadVar.get() == "Herm Test": 
-			self.qieOutText.set(str(hex(tempInt))+":    "+qieCommands.hermTest(tempInt))
-		elif self.qieReadVar.get() == "Brdg Test":
-			self.qieOutText.set(str(hex(tempInt))+":    "+qieCommands.brdgTest(tempInt))
-		elif self.qieReadVar.get() == "255 Test":
-			self.qieOutText.set(str(hex(tempInt))+":    "+qieCommands.tff_Test(tempInt))
-		elif self.qieReadVar.get() == "Zero Test":
-			self.qieOutText.set(str(hex(tempInt))+":    "+qieCommands.zeroTest(tempInt))
-		elif self.qieReadVar.get() == "FW Version":
-			self.qieOutText.set(str(hex(tempInt))+":    "+qieCommands.fwVerTest(tempInt))
-		elif self.qieReadVar.get() == "Get Status":
-			self.qieOutText.set(str(hex(tempInt))+":    "+qieCommands.statusCheck(tempInt))
-		elif self.qieReadVar.get() == "Temperature":
-			self.qieOutText.set(str(hex(tempInt))+":    "+str(qieCommands.sensorTemp(0,tempInt))+" C")  #This will be changed as more slots get used
-		elif self.qieReadVar.get() == "Humidity":
-			self.qieOutText.set(str(hex(tempInt))+":    "+str(qieCommands.sensorHumid(0,tempInt))) #Will be changes as more RM slots get used
-		elif self.qieReadVar.get() == "Unique ID":
-			self.qieOutText.set(str(hex(tempInt))+":    "+str(qieCommands.getUniqueID(0,tempInt)))
+		self.prepareOutSlots()
+		self.myTestStand = TestStand(self.outSlotNumbers)
+		self.myTestStand.runSingle(self.qieReadVar.get())
+		self.outSlotNumbers = []
+	
+	def qie_resetPress(self):
+		# Instantiate a webBus member:
+		b = webBus(self.piChoiceVar.get(),0)
+		b.write(0x00,[0x06])
+		b.sendBatch()
+		print "\n\nBackplane for "+self.piChoiceVar.get()+" reset!\n\n"
 
 	def runTestSuite(self):
 		print str(datetime.now())
-		#ONCE IT'S TIME TO TEST OTHER READOUT MODULES, MAKE THE APPROPRIATE CHANGES HERE
-		for k in range(0,int(self.runtimeNumber.get())):
-			if (k%10 == 0):
-				print "Number of tests completed: ", k
-			for card in (0x19,0x1a,0x1b,0x1c):
-				self.runTestSuiteHelper(card,k)
-		print "\nSuite Completed! Thank you! (:"
+		self.magicResetPress()
+		self.qie_resetPress()
+		for k in self.outSummaries:
+			k.cardGenInfo["User"] = self.nameChoiceVar.get()
+		self.prepareOutSlots()
+		suiteSelection = self.suiteDict[self.suiteChoiceVar.get()]
+		self.myTestStand = TestStand(self.outSlotNumbers, self.outSummaries, suiteSelection, self.piChoiceVar.get(), int(self.iterationVar.get()))
+		self.myTestStand.runAll()
 		print str(datetime.now())
 
-	def runTestSuiteHelper(self,card,inNumber):
-		self.myCommands.runCompleteSuite(card,inNumber)
+	def uHTR_tester_bttnPress(self):
+		outSlotList = []
+		for i in range(len(self.uHTR_slotNumber)):
+			if (self.uHTR_slotNumber[i].get() == 1):
+				outSlotList.append(i)
+		histgen.histo_tests(41, outSlotList, 1000, 0, "","shauntest")
 
-# These next few lines call the class and display the window
-# on the computer screen
+	def magicResetPress(self):
+		b = webBus(self.piChoiceVar.get(),0)
+		for ngccm in [1,2]: #both ngccm
+			b.write(0x72,[ngccm])
+			b.write(0x74,[0x08]) # PCA9538 is bit 3 on ngccm mux
+			# bus.write(0x70,[0x01,0x00]) # GPIO PwrEn is register 3
+			#power on and reset
+			#register 3 is control reg for i/o modes
+			b.write(0x70,[0x03,0x00]) # sets all GPIO pins to 'output' mode
+			b.write(0x70,[0x01,0x00])
+			b.write(0x70,[0x01,0x08])
+			b.write(0x70,[0x01,0x18]) # GPIO reset is 10
+			b.write(0x70,[0x01,0x08])
+			batch = b.sendBatch()
+			print 'initial = ', batch
+
+		print "\n\nMagic reset completed!\n\n"
+		for j in range(2):
+			self.qie_magicButton.flash()
+
+	def powerResetPress(self):
+		b = webBus(self.piChoiceVar.get(),0)
+		for i in [1,2]:
+			b.write(0x72,[i])
+			b.write(0x74,[0x08])
+			b.write(0x70,[0x08,0])
+			b.sendBatch()
+		print "\n\nPower reset completed!\n\n"
+	
+	def prepareOutSlots(self):
+		self.outSlotNumbers = []
+		for k in range(len(self.cardVarList)):
+			if (self.cardVarList[k].get() == 1):
+				if k in [1,2,3,4]:
+					self.outSlotNumbers.append(k+1)
+				elif k in [5,6,7,8]:
+					self.outSlotNumbers.append(k+2)
+				elif k in [9,10,11,12]:
+					self.outSlotNumbers.append(k+9)
+				elif k in [13,14,15,16]:
+					self.outSlotNumbers.append(k+10)
+
+	def prepareOutCards(self):
+		for k in range(len(self.cardVarList)):
+			if k in [1,2,3,4]:
+				self.outSummaries.append(testSummary.testSummary((k+1), self.humanLogName))
+			elif k in [5,6,7,8]:
+				self.outSummaries.append(testSummary.testSummary((k+2), self.humanLogName))
+			elif k in [9,10,11,12]:
+				self.outSummaries.append(testSummary.testSummary((k+9), self.humanLogName))
+			elif k in [13,14,15,16]:
+				self.outSummaries.append(testSummary.testSummary((k+10), self.humanLogName))
+
+	def submitToDatabase(self):
+		subprocess.call("ssh cmshcal11 /home/hep/abaas/testing_database/uploader/upload.sh", shell=True)
+		print "Files submitted to database!"
+
+
 root = Tk()
 myapp = makeGui(root)
+sys.stdout = logClass.logger(myapp.humanLogName)
 root.mainloop()

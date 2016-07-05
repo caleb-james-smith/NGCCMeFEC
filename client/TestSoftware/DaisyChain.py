@@ -1,7 +1,8 @@
 #DaisyChain.py
 #QIE DaisyChain class
 
-import QIE
+from QIE import QIE
+
 
 class DaisyChain:
     def __init__(self, arr = list(0 for i in xrange(64 * 6))):
@@ -9,11 +10,8 @@ class DaisyChain:
         self.QIEs = []
         for i in xrange(6):
             self.QIEs.append(QIE(arr[i * 64:(i + 1) * 64]))
-
-
     def __repr__(self):
         return "DaisyChain()"
-
     def __str__(self):
         r = ""
         for q in self.QIEs:
@@ -22,6 +20,8 @@ class DaisyChain:
             r += "\n"
             r += "-------\n"
         return r
+    def __getitem__(self, i):
+        return self.QIEs[i]
     #returns a flattened array of all QIE register bits to be written as a block
     def flatten(self):
         '''flatten all of the bits in the register's QIEs to one list'''
@@ -29,4 +29,6 @@ class DaisyChain:
         for q in self.QIEs:
             a += q.flatten()
         return a
+    # def getCI(self):
+
 ################################################################################
