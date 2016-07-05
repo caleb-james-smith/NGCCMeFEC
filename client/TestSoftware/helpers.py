@@ -65,6 +65,13 @@ def reverseBytes(message):
     s = " "
     return s.join(message_list)
 
+# Parse Serial Number (6 bytes) from 8 byte Registration Number.
+def serialNum(message):
+    message_list = message.split()
+    message_list = message_list[2:-1]
+    s = " "
+    return s.join(message_list)
+
 def sensorTemp(slot,b):
     b.write(slot,[0x11,0x05,0,0,0])
 

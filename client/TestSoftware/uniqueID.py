@@ -34,7 +34,7 @@ class ID:
         if int(self.raw.split()[1]) != 0x70:
             print 'Not in Family 0x70'
             return 'Family_Code_Error'
-        serial = self.raw[2:-1] # cereal
+        serial = helpers.serialNum(self.raw) # cereal
         oats = helpers.reverseBytes(serial) # reversed
         eggs = helpers.toHex(oats,2) # hex
         return eggs

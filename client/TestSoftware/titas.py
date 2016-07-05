@@ -18,10 +18,6 @@ pi    = "pi5" # 'pi5' or 'pi6' etc
 b     = webBus(pi,0) # webBus sets active pi; 0 = server verbosity off
 slots = [2,5] # list of active J slots
 
-
-##### Unique ID #####
-ID()
-
 ##### Functions ######
 
 def chargeInjectOn(slots, bus):
@@ -213,16 +209,23 @@ def powerEnable(bus):
 
 ##### Calling functions #####
 
-powerEnable(b)
-chargeInjectOn(slots,b)
-#chargeInjectOff(slots,b)
-printDaisyChain(slots,b)
-setPedestalDAC(slots,6,b) #6bits->12fc is default
-#setCapID0pedestal(slots,0,b)
-# setCapID1pedestal(slots,1,b)
-# setCapID2pedestal(slots,1,b)
-# setCapID3pedestal(slots,1,b)
-# setFixRangeModeOn(slots,3,b)
-setChargeInjectDAC(slots,2880,b)
-print "\n\n\n\n\n AFTER CHANGES: \n"
-printDaisyChain(slots,b)
+# powerEnable(b)
+# chargeInjectOn(slots,b)
+# #chargeInjectOff(slots,b)
+# printDaisyChain(slots,b)
+# setPedestalDAC(slots,6,b) #6bits->12fc is default
+# #setCapID0pedestal(slots,0,b)
+# # setCapID1pedestal(slots,1,b)
+# # setCapID2pedestal(slots,1,b)
+# # setCapID3pedestal(slots,1,b)
+# # setFixRangeModeOn(slots,3,b)
+# setChargeInjectDAC(slots,2880,b)
+# print "\n\n\n\n\n AFTER CHANGES: \n"
+# printDaisyChain(slots,b)
+
+
+##### Unique ID #####
+# Initial with a buss and slot
+uID = ID(b,2)
+print uID.raw
+print uID.cooked
