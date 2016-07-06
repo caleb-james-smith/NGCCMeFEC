@@ -11,6 +11,7 @@ class ID:
         self.raw = self.getID()
         self.serial = self.getSerial()
         self.full = self.getFull()
+        self.reallyfull = self.full + '00'
         self.split = self.getSplit()
 
     def getID(self):

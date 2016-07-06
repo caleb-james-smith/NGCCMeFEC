@@ -14,7 +14,7 @@ from uniqueID import ID
 
 
 ##### Global Vars #####
-pi    = "pi6" # 'pi5' or 'pi6' etc
+pi    = "pi5" # 'pi5' or 'pi6' etc
 b     = webBus(pi,0) # webBus sets active pi; 0 = server verbosity off
 all_slots = [2,3,4,5,7,8,9,10,18,19,20,21,23,24,25,26]
 slots = all_slots # list of active J slots
@@ -242,9 +242,10 @@ def printID(bus, slots):
     for slot in slots:
         uID = ID(bus, slot)
         print '\nSlot J' + str(slot)
-        # print 'raw id = ', uID.raw
+        print 'raw id = ', uID.raw
         print 'serial id = ', uID.serial
-        # print 'full id = ', uID.full
+        print 'full id = ', uID.full
+        print 'really full id = ', uID.reallyfull
         print 'split id = ', uID.split
 
 
@@ -266,4 +267,5 @@ def printID(bus, slots):
 
 # Print ID given bus and slots
 # printID(bus, slots)
+mySlots = [2,5,7,8,10]
 printID(b,slots)
