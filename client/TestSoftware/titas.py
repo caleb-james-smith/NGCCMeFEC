@@ -14,7 +14,7 @@ from uniqueID import ID
 
 
 ##### Global Vars #####
-pi    = "pi5" # 'pi5' or 'pi6' etc
+pi    = "pi6" # 'pi5' or 'pi6' etc
 b     = webBus(pi,0) # webBus sets active pi; 0 = server verbosity off
 slots = [2,5] # list of active J slots
 
@@ -206,6 +206,17 @@ def powerEnable(bus):
 
         bus.sendBatch()
 
+##### Unique ID #####
+# Initial with a buss and slot
+def printID(bus, slots):
+    for slot in slots:
+        uID = ID(bus, slot)
+        print '\nSlot J' + str(slot)
+        # print 'raw id = ', uID.raw
+        print 'serial id = ', uID.serial
+        # print 'full id = ', uID.full
+        print 'split id = ', uID.split
+
 
 ##### Calling functions #####
 
@@ -223,9 +234,6 @@ def powerEnable(bus):
 # print "\n\n\n\n\n AFTER CHANGES: \n"
 # printDaisyChain(slots,b)
 
-
-##### Unique ID #####
-# Initial with a buss and slot
-uID = ID(b,2)
-print uID.raw
-print uID.cooked
+# Print ID given bus and slots
+# printID(bus, slots)
+printID(b,slots)

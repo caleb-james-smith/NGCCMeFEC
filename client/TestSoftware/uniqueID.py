@@ -9,7 +9,9 @@ class ID:
         self.bus = bus
         self.slot = slot
         self.raw = self.getID()
-        self.cooked = self.getSerial()
+        self.serial = self.getSerial()
+        self.full = self.getFull()
+        self.split = self.getSplit()
 
     def getID(self):
         Hardware.openChannel(self.slot, self.bus)
@@ -34,7 +36,21 @@ class ID:
         if int(self.raw.split()[1]) != 0x70:
             print 'Not in Family 0x70'
             return 'Family_Code_Error'
-        serial = helpers.serialNum(self.raw) # cereal
-        oats = helpers.reverseBytes(serial) # reversed
+        cereal = helpers.serialNum(self.raw) # serial
+        oats = helpers.reverseBytes(cereal) # reversed
         eggs = helpers.toHex(oats,2) # hex
         return eggs
+
+    def getFull(self):
+        mlist = self.raw.split()
+        if int(mlist.pop(0)) != 0:
+            print 'i2c error'
+        cereal = ' '.join(mlist)
+        oats = helpers.reverseBytes(cereal) # reversed
+        eggs = helpers.toHex(oats,0) # hex
+        return eggs
+
+    def getSplit(self):
+        first = self.full[2:10]
+        last = self.full[10:]
+        return '0x' + first + ' 0x' + last
