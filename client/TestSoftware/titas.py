@@ -267,5 +267,13 @@ def printID(bus, slots):
 
 # Print ID given bus and slots
 # printID(bus, slots)
-mySlots = [2,5,7,8,10]
-printID(b,slots)
+# mySlots = [2,5,7,8,10]
+# printID(b,slots)
+
+# print 'open = ', h.openChannel(2,b)
+# print 'power = ', h.powerEnable(2,b)
+# print 'reset = ', h.magicReset(2,b)
+#
+# print 'open = ', h.openChannel(18,b)
+# print 'power = ', h.powerEnable(1,b)
+# print 'reset = ', h.magicReset(1,b)
