@@ -247,7 +247,8 @@ def printID(bus, slots):
         print 'full id = ', uID.full
         print 'really full id = ', uID.reallyfull
         print 'split id = ', uID.split
-
+        print 'flip id = ', uID.flip
+        print 'sort id = ', uID.sort
 
 ##### Calling functions #####
 
@@ -268,7 +269,7 @@ def printID(bus, slots):
 # Print ID given bus and slots
 # printID(bus, slots)
 # mySlots = [2,5,7,8,10]
-# printID(b,slots)
+printID(b,slots)
 
 # print 'open = ', h.openChannel(2,b)
 # print 'power = ', h.powerEnable(2,b)
