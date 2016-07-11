@@ -39,13 +39,13 @@ def printDaisyChain(slots, bus):
 
         dcs.read() # get real values for 2 daisy chains
 
-        print "\n\n>>>>>>>>>>>> SLOT %d <<<<<<<<<<<<<" %i_slot
+        print '\n\n>>>>>>>>>>>> SLOT %d <<<<<<<<<<<<<' %i_slot
 
         for chip in xrange(12):
-            print "\n######## CHIP %d ########" %chip
+            print '\n######## CHIP %d ########' %chip
             print dcs[chip]
 
-        print "############################"
+        print '############################'
 
 
 ''' change tdc threshold '''
@@ -242,13 +242,13 @@ def printID(bus, slots):
     for slot in slots:
         uID = ID(bus, slot)
         print '\nSlot J' + str(slot)
-        print 'raw id = ', uID.raw
-        print 'serial id = ', uID.serial
-        print 'full id = ', uID.full
-        print 'really full id = ', uID.reallyfull
-        print 'split id = ', uID.split
-        print 'flip id = ', uID.flip
-        print 'sort id = ', uID.sort
+        print 'raw id = '+str(uID.raw+
+        print 'serial id = '+str(uID.serial)
+        print 'full id = '+str(uID.full+
+        print 'really full id = '+str(uID.reallyfull)
+        print 'split id = '+str(uID.split)
+        print 'flip id = '+str(uID.flip)
+        print 'sort id = '+str(uID.sort)
 
 ##### Calling functions #####
 
@@ -263,7 +263,7 @@ def printID(bus, slots):
 # # setCapID3pedestal(slots,1,b)
 # # setFixRangeModeOn(slots,3,b)
 # setChargeInjectDAC(slots,2880,b)
-# print "\n\n\n\n\n AFTER CHANGES: \n"
+# print '\n\n\n\n\n AFTER CHANGES: \n'
 # printDaisyChain(slots,b)
 
 # Print ID given bus and slots
