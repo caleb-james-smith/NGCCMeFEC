@@ -177,7 +177,7 @@ class Igloo2_FPGA_Control(Test):
 		ones_address = 0x02
 		all_ones = '255 255 255 255'
 
-                retval = False
+        retval = False
 
 		self.bus.write(0x00,[0x06])
 		self.bus.sendBatch()
