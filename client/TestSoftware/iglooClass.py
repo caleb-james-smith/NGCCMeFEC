@@ -243,7 +243,7 @@ class Igloo2_FPGA_Control(Test):
             #     print 'Bridge i2c error detected'
             return t.reverseBytes(message[2:])
 
-    	def readIgloo(self, regAddress, num_bytes):
+        def readIgloo(self, regAddress, num_bytes):
     		self.bus.write(0x00,[0x06])
     		self.bus.write(self.address,[0x11,0x03,0,0,0])
     		self.bus.write(0x09,[regAddress])
@@ -486,7 +486,7 @@ class clk_count(Test): #clock count
         reg = i.igloo[name]["register"]
         size = i.igloo[name]["size"] / 8
 	sleepFactor=0.25
-	
+
 
         print '----------%s----------' %name
         resultArr=[]
