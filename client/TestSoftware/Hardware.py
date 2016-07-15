@@ -146,7 +146,8 @@ class iglooPower:
         self.address = getCardAddress(slot)
         self.bus = bus
         openChannel(slot, bus)
-        print self.testBody()
+        # print self.testBody()
+        self.testBody()
 
     def testBody(self):
         # print '~~ Begin Toggle Igloo Power Slave'
@@ -169,6 +170,7 @@ class iglooPower:
 
         # Turn Igloo Off
         # print 'Igloo Control = '+str(self.toggleIgloo())
+        self.toggleIgloo()
         register = self.detectIglooError(ones_address, 4)
         if register[0] != '0':
         	retval = True
@@ -176,6 +178,7 @@ class iglooPower:
 
         # Turn Igloo On
         # print 'Igloo Control = '+str(self.toggleIgloo())
+        self.toggleIgloo()
         register = self.readIgloo(ones_address, 4)
         if register != all_ones:
         	retval = False
