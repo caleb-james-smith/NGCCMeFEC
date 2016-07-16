@@ -191,7 +191,7 @@ class Igloo2_FPGA_Control(Test):
         ones_address = 0x02
         all_ones = '255 255 255 255'
 
-        retval = False
+        	retval = False
 
         self.bus.write(0x00,[0x06])
         self.bus.sendBatch()
@@ -239,29 +239,29 @@ class Igloo2_FPGA_Control(Test):
         self.bus.write(0x19,[regAddress])
         self.bus.read(0x19, num_bytes)
         message = self.bus.sendBatch()[-1]
-        # if message[0] != '0':
-        #     print 'Bridge i2c error detected'
-        return t.reverseBytes(message[2:])
-
-    def readIgloo(self, regAddress, num_bytes):
-        self.bus.write(0x00,[0x06])
-        self.bus.write(self.address,[0x11,0x03,0,0,0])
-        self.bus.write(0x09,[regAddress])
-        self.bus.read(0x09, num_bytes)
-        message = self.bus.sendBatch()[-1]
-        # if message[0] != '0':
-        #       print 'Igloo i2c error detected in readIgloo'
-        return t.reverseBytes(message[2:])
-
-    def detectIglooError(self, regAddress, num_bytes):
-        self.bus.write(0x00,[0x06])
-        self.bus.write(self.address,[0x11,0x03,0,0,0])
-        self.bus.write(0x09,[regAddress])
-        self.bus.read(0x09, num_bytes)
-        message = self.bus.sendBatch()[-1]
         if message[0] != '0':
-                print 'Igloo Power Off Confirmed.'
-        return message
+            print 'Bridge i2c error detected'
+        return t.reverseBytes(message[2:])
+
+	def readIgloo(self, regAddress, num_bytes):
+		self.bus.write(0x00,[0x06])
+		self.bus.write(self.address,[0x11,0x03,0,0,0])
+		self.bus.write(0x09,[regAddress])
+		self.bus.read(0x09, num_bytes)
+		message = self.bus.sendBatch()[-1]
+		if message[0] != '0':
+			print 'Igloo i2c error detected in readIgloo'
+		return t.reverseBytes(message[2:])
+
+	def detectIglooError(self, regAddress, num_bytes):
+		self.bus.write(0x00,[0x06])
+		self.bus.write(self.address,[0x11,0x03,0,0,0])
+		self.bus.write(0x09,[regAddress])
+		self.bus.read(0x09, num_bytes)
+		message = self.bus.sendBatch()[-1]
+		if message[0] != '0':
+			print 'Igloo Power Off Confirmed.'
+		return message
 
 # ------------------------------------------------------------------------
 
