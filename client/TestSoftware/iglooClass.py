@@ -24,7 +24,7 @@ class fpgaMajVer(Test): #inherit from Test class, overload testBody() function
                 print '~~PASS: Igloo Major Ver Firmware = 0 ~~'
                 return True
             else:
-		print '~~FAIL: Igloo Minor Ver Mismatch ~~'
+                print '~~FAIL: Igloo Minor Ver Mismatch ~~'
                 return False
         else:
             return False
@@ -44,7 +44,7 @@ class fpgaMinVer(Test): #inherit from Test class, overload testBody() function
                 print '~~PASS: Igloo Minor Ver Firmware = 9 ~~'
                 return True
             else:
-		print '~~FAIL: Igloo Minor Ver Mismatch ~~'
+                print '~~FAIL: Igloo Minor Ver Mismatch ~~'
                 return False
         else:
             return False
@@ -198,21 +198,21 @@ class Igloo2_FPGA_Control(Test):
 
         register = self.readIgloo(ones_address, 4)
         if register != all_ones:
-        	retval = False
+            retval = False
         print 'Igloo Ones = '+str(register)
 
         # Turn Igloo Off
         print 'Igloo Control = '+str(self.toggleIgloo())
         register = self.detectIglooError(ones_address, 4)
         if register[0] != '0':
-        	retval = True
+            retval = True
         print 'Igloo Ones = '+str(register)
 
         # Turn Igloo On
         print 'Igloo Control = '+str(self.toggleIgloo())
         register = self.readIgloo(ones_address, 4)
         if register != all_ones:
-        	retval = False
+            retval = False
         print 'Igloo Ones = '+str(register)
         if retval:
             print '~~ Toggle Igloo Power PASS'
@@ -229,9 +229,9 @@ class Igloo2_FPGA_Control(Test):
         self.writeBridge(iglooControl,messageList)
         return self.readBridge(iglooControl,4)
 
-	def writeBridge(self, regAddress, messageList):
-		self.bus.write(0x19, [regAddress]+messageList)
-		return self.bus.sendBatch()
+    def writeBridge(self, regAddress, messageList):
+        self.bus.write(0x19, [regAddress]+messageList)
+        return self.bus.sendBatch()
 
     def readBridge(self, regAddress, num_bytes):
         self.bus.write(0x00,[0x06])
@@ -485,8 +485,7 @@ class clk_count(Test): #clock count
         name = "clk_count"
         reg = i.igloo[name]["register"]
         size = i.igloo[name]["size"] / 8
-	sleepFactor=0.25
-
+        sleepFactor=0.25
 
         print '----------%s----------' %name
         resultArr=[]
@@ -497,7 +496,7 @@ class clk_count(Test): #clock count
             if n != 0:
                 diff = resultArr[n] - resultArr[n-1]
                 if diff < 0: diff += 2**32
-		rate = (float(diff)/(sleepFactor))
+                rate = (float(diff)/(sleepFactor))
                 if rate > 41000000 or rate < 40000000: # approx 40MHz clock frequency
                     diffGoodVal = False
                 print rate
@@ -514,7 +513,7 @@ class rst_QIE_count(Test): #reset qie count
         name = "rst_QIE_count"
         reg = i.igloo[name]["register"]
         size = i.igloo[name]["size"] / 8
-	sleepFactor=0.25
+        sleepFactor=0.25
 
         print '----------%s----------' %name
         resultArr=[]
@@ -525,7 +524,7 @@ class rst_QIE_count(Test): #reset qie count
             if n != 0:
                 diff = resultArr[n] - resultArr[n-1]
                 if diff < 0: diff += 2**32
-		rate = (float(diff)/(sleepFactor))
+                rate = (float(diff)/(sleepFactor))
                 if rate > 12500 or rate < 10500: # approx 11kHz
                     diffGoodVal = False
                 print rate
@@ -542,7 +541,7 @@ class wte_count(Test): #warning-test-enable count
         name = "wte_count"
         reg = i.igloo[name]["register"]
         size = i.igloo[name]["size"] / 8
-	sleepFactor = 0.25
+        sleepFactor = 0.25
 
         print '----------%s----------' %name
         resultArr=[]
@@ -553,7 +552,7 @@ class wte_count(Test): #warning-test-enable count
             if n != 0:
                 diff = resultArr[n] - resultArr[n-1]
                 if diff < 0: diff += 2**32
-		rate = (float(diff)/(sleepFactor))
+                rate = (float(diff)/(sleepFactor))
                 if rate > 59000 or rate < 15000: # approx 37kHz
                     diffGoodVal = False
                 print rate
